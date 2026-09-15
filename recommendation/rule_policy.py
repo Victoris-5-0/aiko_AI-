@@ -13,8 +13,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from simulator import CATEGORIES, STALENESS_SATURATION_GAMES, Child, GAMES
-from features import pick_game_in_category, rolling_mean
+from recommendation.simulator import CATEGORIES, STALENESS_SATURATION_GAMES, Child, GAMES
+from recommendation.features import pick_game_in_category, rolling_mean
 
 REPEAT_PENALTY = 0.15
 RULE_INCREASE_THRESHOLD = 0.85

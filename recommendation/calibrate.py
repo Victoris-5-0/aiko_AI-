@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 from sklearn.isotonic import IsotonicRegression
 
-from train import decision_level_metrics
+from recommendation.train import decision_level_metrics
 
 OOF_PATH = "data/oof_predictions.csv"
 BASE_PRED_COL = "pred_catboost"  # the winning baseline model from train.py

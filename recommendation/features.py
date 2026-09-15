@@ -18,7 +18,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
-from simulator import (
+from recommendation.simulator import (
     CATEGORIES,
     CATEGORY_METRIC,
     DIFFICULTY_B,

@@ -25,8 +25,8 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import GroupKFold
 
-from features import CATEGORICAL_COLS, FEATURE_COLS, GROUP_COL, TARGET_COL
-from train import DATA_PATH, EARLY_STOP, N_ESTIMATORS, N_FOLDS, RANDOM_STATE, decision_level_metrics
+from recommendation.features import CATEGORICAL_COLS, FEATURE_COLS, GROUP_COL, TARGET_COL
+from recommendation.train import DATA_PATH, EARLY_STOP, N_ESTIMATORS, N_FOLDS, RANDOM_STATE, decision_level_metrics
 
 ALPHAS = [0.1, 0.5, 0.75, 0.9]
 

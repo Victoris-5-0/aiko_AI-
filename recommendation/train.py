@@ -20,7 +20,7 @@ import xgboost as xgb
 from scipy.stats import spearmanr
 from sklearn.model_selection import GroupKFold
 
-from features import CATEGORICAL_COLS, FEATURE_COLS, GROUP_COL, TARGET_COL
+from recommendation.features import CATEGORICAL_COLS, FEATURE_COLS, GROUP_COL, TARGET_COL
 
 DATA_PATH = "data/aiko_counterfactual_training_data.csv"
 MODEL_DIR = "models"

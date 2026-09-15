@@ -29,7 +29,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 
-from simulator import (
+from recommendation.simulator import (
     CATEGORIES,
     GAMES,
     Child,
@@ -40,8 +40,8 @@ from simulator import (
     simulate_game,
     update_behavior_policy_state,
 )
-from features import ALL_CANDIDATES, build_candidate_row, build_learner_context
-from behavior_policy import choose_action
+from recommendation.features import ALL_CANDIDATES, build_candidate_row, build_learner_context
+from recommendation.behavior_policy import choose_action
 
 SEED = 11
 N_CHILDREN = 300

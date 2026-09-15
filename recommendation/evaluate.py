@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from simulator import (
+from recommendation.simulator import (
     GAMES,
     apply_learning,
     sample_child,
@@ -33,9 +33,9 @@ from simulator import (
     simulate_game,
     HARD_FAIL_THRESHOLD,
 )
-from features import ALL_CANDIDATES, build_learner_context
-from rule_policy import decide_action_rule, rule_update_level
-from ml_policy import decide_action_ml, ml_update_level
+from recommendation.features import ALL_CANDIDATES, build_learner_context
+from recommendation.rule_policy import decide_action_rule, rule_update_level
+from recommendation.ml_policy import decide_action_ml, ml_update_level
 
 EVAL_SEED_BASE = 900_000  # far outside the training seed's draw range
 N_EVAL_CHILDREN = 120

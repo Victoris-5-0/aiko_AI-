@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from simulator import (
+from recommendation.simulator import (
     CATEGORIES,
     DIFFICULTIES,
     DIFFICULTY_B,
@@ -21,7 +21,7 @@ from simulator import (
     ability_to_theta,
     natural_level,
 )
-from features import pick_game_in_category, weakest_category
+from recommendation.features import pick_game_in_category, weakest_category
 
 EXPLORATION_RATE = 0.30
 

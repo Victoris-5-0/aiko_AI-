@@ -20,8 +20,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from simulator import GAMES, Child, update_behavior_policy_state
-from features import ALL_CANDIDATES, build_candidate_row, build_learner_context
+from recommendation.simulator import GAMES, Child, update_behavior_policy_state
+from recommendation.features import ALL_CANDIDATES, build_candidate_row, build_learner_context
 
 
 def decide_action_ml(child: Child, timestamp, bundle: dict) -> tuple[str, int, str]:
