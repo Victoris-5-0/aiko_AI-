@@ -1,0 +1,54 @@
+{
+  "rule": {
+    "overall_reward": 0.6946849935441621,
+    "flow_rate": 0.5039770216526734,
+    "frustration_rate": 0.03049049933716306,
+    "mean_regret": 0.26564264730351045,
+    "category_reward": {
+      "attention": 0.6753,
+      "memory": 0.6699,
+      "problem_solving": 0.7379
+    },
+    "category_coverage": {
+      "memory": 33.87,
+      "problem_solving": 33.87,
+      "attention": 32.26
+    },
+    "category_regret": {
+      "attention": 0.2858,
+      "memory": 0.2908,
+      "problem_solving": 0.2212
+    }
+  },
+  "calibrated": {
+    "overall_reward": 0.7981754048003702,
+    "flow_rate": 0.6584180291648255,
+    "frustration_rate": 0.0015466195315952276,
+    "mean_regret": 0.16173238309922192,
+    "category_reward": {
+      "attention": 0.767,
+      "memory": 0.667,
+      "problem_solving": 0.8195
+    },
+    "category_coverage": {
+      "problem_solving": 65.07,
+      "attention": 31.97,
+      "memory": 2.96
+    },
+    "category_regret": {
+      "attention": 0.1922,
+      "memory": 0.29,
+      "problem_solving": 0.1409
+    }
+  },
+  "paired_comparison": {
+    "mean_diff_ml_minus_rule": 0.10428591286237694,
+    "bootstrap_ci_95": [
+      0.09109977295680394,
+      0.11766695725673196
+    ],
+    "paired_t_test_p": 5.9048843391517914e-30,
+    "wilcoxon_p": 4.668436551192675e-19,
+    "cohens_d": 1.3997524202602334
+  }
+}

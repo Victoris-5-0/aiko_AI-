@@ -1,0 +1,39 @@
+{
+  "lightgbm_ranker": {
+    "decision_level": {
+      "mean_policy_value": 0.8075265971673287,
+      "mean_oracle_value": 0.9593716266599419,
+      "mean_regret": 0.15184502949261308,
+      "median_regret": 0.07171905294237818,
+      "p90_regret": 0.4249141963773254,
+      "top1_accuracy": 0.2901537718380163,
+      "by_true_best_category": {
+        "attention": {
+          "mean_regret": 0.1756,
+          "top1_accuracy": 0.1005,
+          "n": 8415
+        },
+        "memory": {
+          "mean_regret": 0.1976,
+          "top1_accuracy": 0.0075,
+          "n": 6954
+        },
+        "problem_solving": {
+          "mean_regret": 0.0971,
+          "top1_accuracy": 0.6661,
+          "n": 9473
+        }
+      },
+      "picked_category_distribution": {
+        "problem_solving": 0.8499,
+        "attention": 0.1415,
+        "memory": 0.0086
+      },
+      "true_best_category_distribution": {
+        "problem_solving": 0.3813,
+        "attention": 0.3387,
+        "memory": 0.2799
+      }
+    }
+  }
+}

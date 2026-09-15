@@ -1,0 +1,54 @@
+{
+  "rule": {
+    "overall_reward": 0.6946849935441621,
+    "flow_rate": 0.5039770216526734,
+    "frustration_rate": 0.03049049933716306,
+    "mean_regret": 0.26564264730351045,
+    "category_reward": {
+      "attention": 0.6753,
+      "memory": 0.6699,
+      "problem_solving": 0.7379
+    },
+    "category_coverage": {
+      "memory": 33.87,
+      "problem_solving": 33.87,
+      "attention": 32.26
+    },
+    "category_regret": {
+      "attention": 0.2858,
+      "memory": 0.2908,
+      "problem_solving": 0.2212
+    }
+  },
+  "ml": {
+    "overall_reward": 0.7985580745011753,
+    "flow_rate": 0.6537781705700397,
+    "frustration_rate": 0.0013256738842244808,
+    "mean_regret": 0.16101763032570954,
+    "category_reward": {
+      "attention": 0.7633,
+      "memory": 0.682,
+      "problem_solving": 0.8169
+    },
+    "category_coverage": {
+      "problem_solving": 70.64,
+      "attention": 26.18,
+      "memory": 3.18
+    },
+    "category_regret": {
+      "attention": 0.1934,
+      "memory": 0.2721,
+      "problem_solving": 0.144
+    }
+  },
+  "paired_comparison": {
+    "mean_diff_ml_minus_rule": 0.10469231927022807,
+    "bootstrap_ci_95": [
+      0.09173368876918704,
+      0.11796436060209507
+    ],
+    "paired_t_test_p": 1.3074510231402079e-30,
+    "wilcoxon_p": 2.4014240182492084e-19,
+    "cohens_d": 1.4264387231119964
+  }
+}
