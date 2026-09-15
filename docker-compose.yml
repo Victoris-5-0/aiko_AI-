@@ -1,0 +1,19 @@
+services:
+  aiko-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: aiko-ai:latest
+    container_name: aiko-ai-api
+    env_file:
+      - .env
+    ports:
+      - "${AIKO_PORT:-8000}:8000"
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3

@@ -1,0 +1,24 @@
+.git
+.gitignore
+.env
+.env.*
+
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.vscode/
+.idea/
+.DS_Store
+
+# Reproducible training data and local outputs are not needed at runtime.
+data/
+*.csv
+*.log
+
+# Keep the deployed model bundles under models/.
