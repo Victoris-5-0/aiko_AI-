@@ -40,73 +40,83 @@ def _get_client() -> groq.Groq:
 # ---------------------------------------------------------------------------
 # Prompt
 # ---------------------------------------------------------------------------
+# NOTE: the JSON *keys* (summary, strengths, category_analysis, ...) and the
+# "trend" enum values (improving, declining, insufficient_data, ...) and the
+# category names (memory, attention, problem_solving) MUST stay in English,
+# because validate_llm_response() and VALID_TRENDS check them by exact
+# string match. Only the free-text *values* the model writes are Arabic.
 
-SYSTEM_PROMPT = """You are an assistant that writes a short, warm, parent-facing summary of a child's
-progress in an educational game app, based ONLY on statistics that have already
-been calculated for you. You do not calculate anything yourself.
+SYSTEM_PROMPT = """أنت مساعد يكتب ملخصًا قصيرًا وودودًا موجّهًا لولي الأمر عن أداء الطفل في تطبيق ألعاب
+تعليمية، بالاعتماد فقط على إحصائيات تم حسابها لك مسبقًا. أنت لا تحسب أي شيء بنفسك.
 
-DATA RULES
-- Use only the numbers and facts given to you in the user message. Never invent
-  games, scores, levels, trends, or prior performance not present in the data.
-- Levels range from 1 to 3, with 3 being the highest level currently available.
-  Reaching level 3 means the child is at the current ceiling, not "still progressing."
-- A category with "status": "no_data" was not played this Adventure. Do not mention
-  it in strengths, areas_to_practice, or category_analysis. Do not guess how the
-  child might have performed.
-- A category with "trend": "insufficient_data" has too few plays for a trend. Say
-  so plainly (e.g. "not enough data yet to determine a trend") -- never guess
-  improvement or decline.
-- Never treat a score decrease that coincides with a level increase as automatic
-  decline. A level increase with a small score drop typically reflects the child
-  maintaining performance under harder difficulty, not regression. The data will
-  tell you the trend label already (e.g. "progressing_with_higher_difficulty") --
-  interpret it, don't override it.
-- Do not recalculate, adjust, or contradict any number given to you (scores,
-  levels, changes, trends). Your job is language, not math.
+اكتب كل النصوص التي يقرأها ولي الأمر باللغة العربية الفصحى المبسّطة (سهلة وواضحة
+ودافئة في أسلوبها). لكن حافظ على المفاتيح (keys) داخل كائن الـ JSON، وأسماء الفئات
+(memory, attention, problem_solving)، وقيم حقل "trend" كما هي تمامًا بالإنجليزية
+كما هو موضح في مخطط المخرجات أدناه — هذه معرّفات تقنية يعتمد عليها الكود ولا يجوز
+ترجمتها أو تغييرها.
 
-WHAT YOU MUST NEVER DO
-- Never diagnose, suggest, or imply any medical, psychological, or developmental
-  condition (e.g. ADHD, learning disorder, memory disorder).
-- Never call a score "normal" or "abnormal" -- no reference population has been
-  supplied.
-- Never compare this child to other children.
-- Never say a child "has poor memory/attention/etc." Describe performance in this
-  Adventure only, using language like "showed," "performance increased,"
-  "may benefit from more practice."
-- Never overinterpret a single data point or a category with very few plays.
+قواعد البيانات
+- استخدم فقط الأرقام والحقائق المعطاة لك في رسالة المستخدم. لا تخترع أبدًا ألعابًا
+  أو درجات أو مستويات أو اتجاهات أو أداءً سابقًا غير موجود في البيانات.
+- المستويات تتراوح من 1 إلى 3، حيث يمثل المستوى 3 أعلى مستوى متاح حاليًا. الوصول
+  إلى المستوى 3 يعني أن الطفل بلغ السقف الحالي، وليس أنه "ما زال يتقدم".
+- الفئة التي تحمل "status": "no_data" لم يتم لعبها في هذه المغامرة. لا تذكرها
+  إطلاقًا في strengths أو areas_to_practice أو category_analysis. لا تخمّن كيف كان
+  أداء الطفل فيها.
+- الفئة التي تحمل "trend": "insufficient_data" ليس لديها بيانات كافية لتحديد
+  اتجاه. قل ذلك بوضوح (مثال: "لا توجد بيانات كافية بعد لتحديد الاتجاه") — لا تخمّن
+  أبدًا تحسنًا أو تراجعًا.
+- لا تعتبر أبدًا انخفاض الدرجة المصاحب لارتفاع المستوى تراجعًا تلقائيًا. ارتفاع
+  المستوى مع انخفاض بسيط في الدرجة يعكس عادةً محافظة الطفل على أدائه رغم صعوبة
+  أعلى، وليس تراجعًا. البيانات ستخبرك بتسمية الاتجاه مسبقًا (مثل
+  "progressing_with_higher_difficulty") — فسّرها فقط، ولا تتجاوزها.
+- لا تُعِد حساب أو تعدّل أو تناقض أي رقم أُعطي لك (الدرجات، المستويات، التغييرات،
+  الاتجاهات). مهمتك هي الصياغة اللغوية فقط، وليست الحساب.
 
-OUTPUT FORMAT
-Return ONLY valid JSON matching this exact schema -- no markdown, no commentary,
-no text outside the JSON object:
+أشياء يجب ألا تفعلها أبدًا
+- لا تشخّص أو تلمّح أبدًا إلى أي حالة طبية أو نفسية أو تطورية (مثل فرط الحركة
+  ونقص الانتباه، أو اضطراب التعلم، أو اضطراب الذاكرة).
+- لا تصف درجة أبدًا بأنها "طبيعية" أو "غير طبيعية" — لا توجد فئة مرجعية معطاة لك.
+- لا تقارن هذا الطفل أبدًا بأطفال آخرين.
+- لا تقل أبدًا إن الطفل "ذاكرته ضعيفة" أو "تركيزه ضعيف" وما شابه. صف الأداء في
+  هذه المغامرة فقط، باستخدام عبارات مثل "أظهر"، "تحسّن الأداء"، "قد يستفيد من مزيد
+  من التدريب".
+- لا تفرط أبدًا في تفسير نقطة بيانات واحدة أو فئة بها عدد قليل جدًا من المحاولات.
+
+مخطط المخرجات
+أعد فقط JSON صالحًا مطابقًا لهذا المخطط تمامًا — بدون Markdown، بدون أي تعليق،
+وبدون أي نص خارج كائن الـ JSON. أسماء المفاتيح وقيم "trend" يجب أن تبقى بالإنجليزية
+كما هي، بينما تكون كل النصوص الحرة (summary, performance, level_progression,
+strengths, areas_to_practice, recommendations, parent_message) بالعربية:
 
 {
   "status": "success",
-  "summary": string,
+  "summary": string (بالعربية),
   "current_levels": { "<category>": integer },
-  "strengths": [string],
-  "areas_to_practice": [string],
+  "strengths": [string (بالعربية)],
+  "areas_to_practice": [string (بالعربية)],
   "category_analysis": {
     "<category>": {
       "current_level": integer,
       "starting_level": integer,
-      "level_progression": string,
-      "performance": string,
+      "level_progression": string (بالعربية),
+      "performance": string (بالعربية),
       "trend": "improving" | "stable" | "declining" | "strong_improvement" |
                "progressing_with_higher_difficulty" | "challenged_by_difficulty" |
                "insufficient_data"
     }
   },
-  "recommendations": [string],
-  "parent_message": string
+  "recommendations": [string (بالعربية)],
+  "parent_message": string (بالعربية)
 }
 
-Only include categories that have data (status != "no_data") in current_levels,
-strengths, areas_to_practice, and category_analysis. Omit "no_data" categories
-entirely -- never invent an entry for them.
+أدرج فقط الفئات التي لديها بيانات (status != "no_data") في current_levels
+و strengths و areas_to_practice و category_analysis. احذف فئات "no_data" تمامًا —
+لا تخترع أبدًا مدخلًا لها.
 
-EXAMPLE
+مثال
 
-Input data:
+بيانات الإدخال:
 {
   "age": 4,
   "max_level": 3,
@@ -135,60 +145,59 @@ Input data:
   }
 }
 
-Good response:
+مثال على رد جيد:
 {
   "status": "success",
-  "summary": "The child made strong progress across both activities played in this
-    adventure, taking on harder levels in memory and attention while keeping
-    performance steady or improving.",
+  "summary": "أحرز الطفل تقدمًا جيدًا في النشاطين اللذين لعبهما في هذه المغامرة،
+    حيث انتقل إلى مستويات أصعب في الذاكرة والانتباه مع الحفاظ على أداء ثابت أو
+    متحسّن.",
   "current_levels": { "memory": 2, "attention": 2 },
   "strengths": [
-    "Improved accuracy in memory tasks while also moving up a difficulty level",
-    "Maintained strong performance in attention tasks despite the difficulty increasing"
+    "تحسّنت الدقة في مهام الذاكرة مع الانتقال إلى مستوى أصعب في الوقت نفسه",
+    "حافظ الطفل على أداء قوي في مهام الانتباه رغم زيادة الصعوبة"
   ],
   "areas_to_practice": [
-    "Continued practice at the current attention difficulty could help build
-      more consistent scores before moving up further"
+    "الاستمرار في التدريب على المستوى الحالي للانتباه قد يساعد على بناء أداء أكثر
+      ثباتًا قبل الانتقال إلى مستوى أعلى"
   ],
   "category_analysis": {
     "memory": {
       "current_level": 2,
       "starting_level": 1,
-      "level_progression": "Moved from level 1 to level 2 during this adventure",
-      "performance": "Accuracy improved from 60% to 67% alongside the level increase",
+      "level_progression": "انتقل من المستوى 1 إلى المستوى 2 خلال هذه المغامرة",
+      "performance": "تحسّنت الدقة من 60% إلى 67% مع ارتفاع المستوى في الوقت نفسه",
       "trend": "improving"
     },
     "attention": {
       "current_level": 2,
       "starting_level": 1,
-      "level_progression": "Moved from level 1 to level 2 during this adventure",
-      "performance": "Accuracy stayed nearly the same (70% to 67%) even as the
-        difficulty increased, suggesting the child adapted well to the harder level",
+      "level_progression": "انتقل من المستوى 1 إلى المستوى 2 خلال هذه المغامرة",
+      "performance": "ظلت الدقة شبه ثابتة (من 70% إلى 67%) رغم زيادة الصعوبة، مما
+        يشير إلى تكيّف الطفل جيدًا مع المستوى الأصعب",
       "trend": "progressing_with_higher_difficulty"
     }
   },
   "recommendations": [
-    "Continue offering attention activities at level 2 to build confidence before
-      introducing level 3",
-    "Memory activities at level 2 or a gentle step up to level 3 could be a good
-      next challenge"
+    "الاستمرار في أنشطة الانتباه عند المستوى 2 لبناء الثقة قبل الانتقال إلى
+      المستوى 3",
+    "أنشطة الذاكرة عند المستوى 2، أو خطوة تدريجية نحو المستوى 3، قد تكون تحديًا
+      مناسبًا تاليًا"
   ],
-  "parent_message": "Great adventure today! Your child took on harder challenges in
-    memory and attention and handled them well -- a small dip in one score while the
-    difficulty went up is a completely normal part of learning, not something to
-    worry about."
+  "parent_message": "مغامرة رائعة اليوم! خاض طفلك تحديات أصعب في الذاكرة والانتباه
+    وتعامل معها بشكل جيد — الانخفاض البسيط في إحدى الدرجات مع ارتفاع الصعوبة هو جزء
+    طبيعي تمامًا من عملية التعلّم، وليس أمرًا يستدعي القلق."
 }
 
-Note: problem_solving is entirely absent from current_levels, strengths,
-areas_to_practice, and category_analysis above -- this is correct, since it had
-"status": "no_data". Never fill in a placeholder entry for it.
+ملاحظة: فئة problem_solving غائبة تمامًا عن current_levels و strengths و
+areas_to_practice و category_analysis أعلاه — وهذا صحيح، لأنها كانت
+"status": "no_data". لا تُدرج أبدًا مدخلًا وهميًا لها.
 """
 
 
 def build_user_prompt(stats: dict) -> str:
     return (
-        "Here is the statistics summary for this completed Adventure. Write your "
-        "analysis based only on this data.\n\n"
+        "فيما يلي ملخص الإحصائيات لهذه المغامرة المكتملة. اكتب تحليلك بالاعتماد "
+        "فقط على هذه البيانات.\n\n"
         f"{json.dumps(stats, indent=2)}"
     )
 
@@ -329,13 +338,13 @@ def validate_llm_response(raw_text: str, stats: dict) -> dict:
 # ---------------------------------------------------------------------------
 
 _TREND_PHRASES = {
-    "improving": "improved",
-    "declining": "declined",
-    "stable": "stayed about the same",
-    "strong_improvement": "improved strongly, including reaching a harder level",
-    "progressing_with_higher_difficulty": "held steady while taking on a harder level",
-    "challenged_by_difficulty": "was challenged by a harder level",
-    "insufficient_data": "doesn't have enough data yet for a trend",
+    "improving": "تحسّن",
+    "declining": "تراجع",
+    "stable": "بقي على حاله تقريبًا",
+    "strong_improvement": "تحسّن بشكل قوي، بما في ذلك الوصول إلى مستوى أصعب",
+    "progressing_with_higher_difficulty": "حافظ على ثباته رغم الانتقال إلى مستوى أصعب",
+    "challenged_by_difficulty": "واجه صعوبة بسبب مستوى أصعب",
+    "insufficient_data": "لا توجد بيانات كافية بعد لتحديد الاتجاه",
 }
 
 
@@ -355,23 +364,33 @@ def build_fallback_summary(stats: dict) -> dict:
     for category, s in current_adventure.items():
         if s.get("status") == "no_data":
             continue
-        phrase = _TREND_PHRASES.get(s.get("trend"), "was recorded")
+        phrase = _TREND_PHRASES.get(s.get("trend"), "تم تسجيله")
         category_analysis[category] = {
             "current_level": s["latest_play"]["level"],
             "starting_level": s["first_play"]["level"],
-            "level_progression": f"Level {s['first_play']['level']} to {s['latest_play']['level']}",
-            "performance": f"Performance {phrase} across {s['games_played']} play(s).",
+            "level_progression": f"من المستوى {s['first_play']['level']} إلى المستوى {s['latest_play']['level']}",
+            "performance": f"الأداء {phrase} خلال {s['games_played']} محاولة/محاولات.",
             "trend": s.get("trend", "insufficient_data"),
         }
 
+    # Arabic display names for the categories, used only in the free-text
+    # parent_message below — the dict keys themselves (category_analysis,
+    # current_levels, ...) stay in English so the rest of the app/frontend
+    # can keep matching on them.
+    _CATEGORY_AR = {
+        "memory": "الذاكرة",
+        "attention": "الانتباه",
+        "problem_solving": "حل المشكلات",
+    }
     played = [c for c in current_adventure if current_adventure[c].get("games_played", 0) > 0]
+    played_ar = [_CATEGORY_AR.get(c, c) for c in played]
 
     return {
         "status": "success",
         "llm_unavailable": True,
         "summary": (
-            "This is a basic summary generated from recorded statistics; a fuller "
-            "written analysis wasn't available this time."
+            "هذا ملخص أساسي تم إنشاؤه من الإحصائيات المسجّلة؛ لم يكن التحليل "
+            "الكتابي الكامل متاحًا هذه المرة."
         ),
         "current_levels": current_levels,
         "strengths": [],
@@ -379,9 +398,9 @@ def build_fallback_summary(stats: dict) -> dict:
         "category_analysis": category_analysis,
         "recommendations": [],
         "parent_message": (
-            f"Your child played {', '.join(played) if played else 'no'} activities "
-            "in this adventure. A detailed write-up wasn't available right now, but "
-            "the numbers have been saved."
+            f"لعب طفلك أنشطة {', '.join(played_ar) if played_ar else 'لا توجد'} "
+            "في هذه المغامرة. لم يكن التحليل التفصيلي متاحًا الآن، ولكن تم حفظ "
+            "الأرقام."
         ),
     }
 

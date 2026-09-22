@@ -206,7 +206,7 @@ console.log(analysis.parent_message);
 ```
 KeyError: 'GROQ_API_KEY'
 ```
-Solution: Make sure `.env` file exists in `/home/dallash/code/home/aiko/parent_llm/` with the API key
+Solution: Make sure `.env` file exists in `aiko_AI-` with the API key
 
 **Module Not Found: fastapi**
 ```
